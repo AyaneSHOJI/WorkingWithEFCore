@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace WorkingWithEFCore.AutoGen
 {
     [Index("CategoryName", Name = "CategoryName")]
-    public partial class Category
+    public partial class Category // partial = to create a matching partial class for adding additional code
     {
         public Category()
         {

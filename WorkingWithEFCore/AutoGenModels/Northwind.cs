@@ -16,6 +16,8 @@ namespace WorkingWithEFCore.AutoGen
         {
         }
 
+        // these constructors : useful in apps where you want to specify the connection string at runtime
+
         public virtual DbSet<Category> Categories { get; set; } = null!;
         public virtual DbSet<Product> Products { get; set; } = null!;
 
