@@ -47,6 +47,7 @@ static void FilteredInclude()
             return;
         }
 
+        // get the generated SQL statement with ToQueryString
         WriteLine($"ToQueryString : {categories.ToQueryString()}");
 
         foreach(Category c in categories)
