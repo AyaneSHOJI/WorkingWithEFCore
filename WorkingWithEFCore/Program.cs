@@ -123,6 +123,12 @@ static void QueryWithLike()
         string? input = ReadLine();
 
         IQueryable<Product>? products = db.Products?
+            // Like Summary:
+            //     An implementation of the SQL LIKE operation. On relational databases this is
+            //     usually directly translated to SQL.
+            //     Note that the semantics of the comparison will depend on the database configuration.
+            //     In particular, it may be either case-sensitive or case-insensitive.
+            //%	= Any string of zero or more characters.	title like '%computer%' finds all titles with the word "computer" anywhere in the title.
             .Where(p => EF.Functions.Like(p.ProductName, $"%{input}%"));
 
         if(products is null)
