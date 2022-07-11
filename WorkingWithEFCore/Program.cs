@@ -1,17 +1,23 @@
 ﻿using Packt.Shared;
 using Microsoft.EntityFrameworkCore; // Include extension method
 using static System.Console;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 //WriteLine($"Using {ProjectConstants.DatabaseProvider} database provider");
 //QueryingCategories();
-FilteredInclude();
-//QueryingProducts();
+//FilteredInclude();
+QueryingProducts();
 
 
 static void QueryingCategories()
 {
     using (Northwind db = new())
     {
+        ILoggerFactory loggerFactory = db.GetService<ILoggerFactory>();
+        loggerFactory.AddProvider(new ConsoleLoggerProvider());
+
         WriteLine("Categories and how many products they have:");
 
         // a query ti get all categories and their related products
@@ -35,6 +41,9 @@ static void FilteredInclude()
 {
     using (Northwind db = new())
     {
+        ILoggerFactory loggerFactory = db.GetService<ILoggerFactory>();
+        loggerFactory.AddProvider(new ConsoleLoggerProvider());
+
         Write("Enter a minimum for units in stock: ");
         string unitsInStock = ReadLine() ?? "10";
         int stock = int.Parse(unitsInStock);
@@ -66,6 +75,9 @@ static void QueryingProducts()
 {
     using(Northwind db = new())
     {
+        ILoggerFactory loggerFactory = db.GetService<ILoggerFactory>();
+        loggerFactory.AddProvider(new ConsoleLoggerProvider());
+
         WriteLine("Products that cost more than a price, highest at top.");
         string? input;
         decimal price;
