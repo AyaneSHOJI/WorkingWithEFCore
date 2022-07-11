@@ -2,13 +2,13 @@
 using Microsoft.EntityFrameworkCore; // Include extension method
 using static System.Console;
 
-Console.WriteLine($"Using {ProjectConstants.DatabaseProvider} database provider");
-queryingCategories();
+//WriteLine($"Using {ProjectConstants.DatabaseProvider} database provider");
+//QueryingCategories();
 FilteredInclude();
-QueryingProducts();
+//QueryingProducts();
 
 
-static void queryingCategories()
+static void QueryingCategories()
 {
     using (Northwind db = new())
     {
@@ -46,6 +46,8 @@ static void FilteredInclude()
             WriteLine("No categories found.");
             return;
         }
+
+        WriteLine($"ToQueryString : {categories.ToQueryString()}");
 
         foreach(Category c in categories)
         {
