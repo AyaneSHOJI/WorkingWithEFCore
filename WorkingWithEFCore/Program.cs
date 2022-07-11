@@ -8,7 +8,8 @@ using Microsoft.Extensions.Logging;
 //WriteLine($"Using {ProjectConstants.DatabaseProvider} database provider");
 //QueryingCategories();
 //FilteredInclude();
-QueryingProducts();
+//QueryingProducts();
+QueryWithLike();
 
 
 static void QueryingCategories()
@@ -108,6 +109,33 @@ static void QueryingProducts()
                 p.ProductId, p.ProductName, p.Cost, p.Stock);
         }
      
+    }
+}
+
+static void QueryWithLike()
+{
+    using(Northwind db = new())
+    {
+        ILoggerFactory loggerFactory = db.GetService<ILoggerFactory>();
+        loggerFactory.AddProvider(new ConsoleLoggerProvider());
+
+        Write("Enter part of a product name: ");
+        string? input = ReadLine();
+
+        IQueryable<Product>? products = db.Products?
+            .Where(p => EF.Functions.Like(p.ProductName, $"%{input}%"));
+
+        if(products is null)
+        {
+            WriteLine("No products found.");
+            return;
+        }
+
+        foreach(Product p in products)
+        {
+            WriteLine("{0} has {1} units in stock. Discontinued? {2}",
+                p.ProductName, p.Stock, p.Discontinued);
+        }
     }
 }
 
