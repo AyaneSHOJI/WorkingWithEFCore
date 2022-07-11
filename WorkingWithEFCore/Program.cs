@@ -6,9 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 //WriteLine($"Using {ProjectConstants.DatabaseProvider} database provider");
-QueryingCategories();
+//QueryingCategories();
 //FilteredInclude();
-//QueryingProducts();
+QueryingProducts();
 
 
 static void QueryingCategories()
@@ -90,6 +90,7 @@ static void QueryingProducts()
         } while(!decimal.TryParse(input, out price));
 
         IQueryable<Product>? products = db.Products?
+            .TagWith("Products filtered by price and sorted.")
             .Where(p => p.Cost > price)
             .OrderByDescending(p => p.Cost);
 
