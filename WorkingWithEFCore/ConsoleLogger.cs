@@ -52,20 +52,25 @@ public class ConsoleLoggerProvider : ILoggerProvider
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception, string> formatter)
         {
-            // Log the level and event indentifier
-            Write($"Level: {logLevel}, Event Id {eventId.Id}");
-
-            // only output the state or exception if it exists
-            if(state != null)
+            // to know how the LINQ query has been translated into SQL statement and is exectuting 
+            if(eventId.Id == 20100)
             {
-                Write($", State: {state}");
-            }
+                // Log the level and event indentifier
+                Write($"Level: {logLevel}, Event Id {eventId.Id}");
 
-            if(exception != null)
-            {
-                Write($", Exception : {exception.Message}");
+                // only output the state or exception if it exists
+                if (state != null)
+                {
+                    Write($", State: {state}");
+                }
+
+                if (exception != null)
+                {
+                    Write($", Exception : {exception.Message}");
+                }
+                WriteLine();
             }
-            WriteLine();
+        
         }
 
     }

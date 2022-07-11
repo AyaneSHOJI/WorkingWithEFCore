@@ -6,9 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 //WriteLine($"Using {ProjectConstants.DatabaseProvider} database provider");
-//QueryingCategories();
+QueryingCategories();
 //FilteredInclude();
-QueryingProducts();
+//QueryingProducts();
 
 
 static void QueryingCategories()
