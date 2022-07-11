@@ -4,13 +4,20 @@ using static System.Console;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore.ChangeTracking; // CollectionEntry
 
 //WriteLine($"Using {ProjectConstants.DatabaseProvider} database provider");
 //QueryingCategories();
 //FilteredInclude();
 //QueryingProducts();
-QueryWithLike();
+//QueryWithLike();
 
+if(AddProduct(categoryId: 6, productName: "Bob's Burgers", price: 500M))
+{
+    WriteLine("Add product successful.");
+}
+
+ListProducts();
 
 static void QueryingCategories()
 {
@@ -22,7 +29,27 @@ static void QueryingCategories()
         WriteLine("Categories and how many products they have:");
 
         // a query ti get all categories and their related products
-        IQueryable<Category>? categories = db.Categories?.Include(c => c.Products);   
+        IQueryable<Category>? categories; //= db.Categories; //.Include(c => c.Products);   
+
+        db.ChangeTracker.LazyLoadingEnabled = false;
+
+        Write("Enable eager loading ? (Y/N): ");
+        bool eagerloading = (ReadKey().Key == ConsoleKey.Y);
+        bool explicitloading = false;
+        WriteLine();
+
+        if (eagerloading)
+        {
+            categories = db.Categories?.Include(c => c.Products);
+        }
+        else
+        {
+            categories = db.Categories;
+
+            Write("Enable explicit loading? (Y/N): ");
+            explicitloading = (ReadKey().Key == ConsoleKey.Y);
+            WriteLine();
+        }
 
         if(categories is null)
         {
@@ -32,6 +59,15 @@ static void QueryingCategories()
         // execute query and enumerate results
         foreach(Category c in categories)
         {
+            Write($"Explicitly load products for {c.CategoryName}? (Y/N): ");
+            ConsoleKeyInfo key = ReadKey();
+            WriteLine();
+            if(key.Key == ConsoleKey.Y)
+            {
+                CollectionEntry<Category, Product> products =
+                    db.Entry(c).Collection(c2 => c2.Products);
+                if(!products.IsLoaded)products.Load();
+            }
             WriteLine($"{c.CategoryName} has {c.Products.Count} products");
         }
 
@@ -145,3 +181,38 @@ static void QueryWithLike()
     }
 }
 
+static bool AddProduct(int categoryId, string productName, decimal? price)
+{
+    using(Northwind db = new())
+    {
+        Product p = new()
+        {
+            CategoryId = categoryId,
+            ProductName = productName,
+            Cost = price
+        };
+
+        // mark product as added in change tracking
+        db.Products.Add(p);
+
+        // save tracked chang to database
+        int affected = db.SaveChanges();
+        return (affected == 1);
+    }
+}
+
+static void ListProducts()
+{
+    using(Northwind db = new())
+    {
+        WriteLine("{0, -3} {1, -35} {2,8} {3,5} {4}",
+            "Id", "Product Name", "Cost", "Stock", "Disc.");
+
+        foreach(Product p in db.Products
+            .OrderByDescending(product => product.Cost))
+        {
+            WriteLine("{0:000} {1, -35} {2,8:$#,##0.00} {3,5} {4}",
+                p.ProductId, p.ProductName, p.Cost, p.Stock, p.Discontinued);
+        }
+    }
+}
