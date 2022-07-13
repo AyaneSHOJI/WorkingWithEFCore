@@ -12,17 +12,22 @@ using Microsoft.EntityFrameworkCore.ChangeTracking; // CollectionEntry
 //QueryingProducts();
 //QueryWithLike();
 
-if(AddProduct(categoryId: 6, productName: "Bob's Burgers", price: 500M))
-{
-    WriteLine("Add product successful.");
-}
+//if(AddProduct(categoryId: 6, productName: "Bob's Burgers", price: 500M))
+//{
+//    WriteLine("Add product successful.");
+//}
 
+if (IncreaseProductPrice(productNameStartWith: "Bob", amount: 20M))
+{
+    WriteLine("Update product price successful.");
+}
+    
 ListProducts();
 
 static void QueryingCategories()
 {
     using (Northwind db = new())
-    {
+    { 
         ILoggerFactory loggerFactory = db.GetService<ILoggerFactory>();
         loggerFactory.AddProvider(new ConsoleLoggerProvider());
 
@@ -214,5 +219,20 @@ static void ListProducts()
             WriteLine("{0:000} {1, -35} {2,8:$#,##0.00} {3,5} {4}",
                 p.ProductId, p.ProductName, p.Cost, p.Stock, p.Discontinued);
         }
+    }
+}
+
+static bool IncreaseProductPrice(string productNameStartWith, decimal amount)
+{
+    using(Northwind db = new())
+    {
+        // get first product whose name starts with name
+        Product updateProduct = db.Products.First(
+            p => p.ProductName.StartsWith(productNameStartWith));
+
+        updateProduct.Cost += amount;
+
+        int affected = db.SaveChanges();
+        return(affected == 1);
     }
 }
