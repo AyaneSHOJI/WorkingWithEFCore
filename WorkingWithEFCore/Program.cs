@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore.ChangeTracking; // CollectionEntry
+using Microsoft.EntityFrameworkCore.Storage; // IDbContextTransaction
 
 //WriteLine($"Using {ProjectConstants.DatabaseProvider} database provider");
 //QueryingCategories();
@@ -12,17 +13,20 @@ using Microsoft.EntityFrameworkCore.ChangeTracking; // CollectionEntry
 //QueryingProducts();
 //QueryWithLike();
 
-//if(AddProduct(categoryId: 6, productName: "Bob's Burgers", price: 500M))
+//if (AddProduct(categoryId: 6, productName: "Bob's Burgers", price: 500M))
 //{
 //    WriteLine("Add product successful.");
 //}
 
-if (IncreaseProductPrice(productNameStartWith: "Bob", amount: 20M))
-{
-    WriteLine("Update product price successful.");
-}
-    
-ListProducts();
+//if (IncreaseProductPrice(productNameStartWith: "Bob", amount: 20M))
+//{
+//    WriteLine("Update product price successful.");
+//}
+
+int deleted = DeleteProducts(productNameStartingWith: "Bob");
+WriteLine($"{ deleted } product(s) were deleted.");
+
+//ListProducts();
 
 static void QueryingCategories()
 {
@@ -226,7 +230,7 @@ static bool IncreaseProductPrice(string productNameStartWith, decimal amount)
 {
     using(Northwind db = new())
     {
-        // get first product whose name starts with name
+        // get first product whose name starts with name "Bob"
         Product updateProduct = db.Products.First(
             p => p.ProductName.StartsWith(productNameStartWith));
 
@@ -234,5 +238,35 @@ static bool IncreaseProductPrice(string productNameStartWith, decimal amount)
 
         int affected = db.SaveChanges();
         return(affected == 1);
+    }
+}
+
+static int DeleteProducts(string productNameStartingWith)
+{
+    using (Northwind db = new())
+    {
+        using (IDbContextTransaction t = db.Database.BeginTransaction())
+        {
+            WriteLine("Transaction isolation level: {0}",
+                arg0: t.GetDbTransaction().IsolationLevel);
+
+
+            IQueryable<Product>? products = db.Products?.Where(p => p.ProductName.StartsWith(productNameStartingWith));
+
+            if (products is null)
+            {
+                WriteLine("No products found to delete.");
+                return 0;
+            }
+            else
+            {
+                db.Products.RemoveRange(products);
+            }
+
+            int affected = db.SaveChanges();
+            t.Commit();
+            return affected;
+        }
+
     }
 }
